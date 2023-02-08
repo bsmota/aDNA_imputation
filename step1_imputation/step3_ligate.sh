@@ -20,7 +20,7 @@ BIN=/GLIMPSE-v1.1.1/ligate/bin/GLIMPSE_ligate
 
 
 LST=/step2_ligate/lists/chr$CHR.list.txt
-ls /step1_impute/output/chr$CHR.reg*.bcf > $LST
+ls /step1_impute/output/chr$CHR.reg*.vcf.gz > $LST
 
 OUT=/step2_ligate/ligated/chr$CHR.ligated.vcf.gz
 OUL=/step2_ligate/ligated/chr$CHR.ligated.log
