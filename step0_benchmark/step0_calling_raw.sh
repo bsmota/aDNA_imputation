@@ -26,10 +26,15 @@ BAMDIR=/bams
 FASTA=reference.genome.fa #reference genome data was aligned to
 
 
-#Position file	
-VPOS=/work/FAC/FBM/DBC/amalaspi/popgen/shared_ressources/1000Genomes_umich/1000G_umich_sites/${REF}_chr${CHR}_${VTYPE}.vcf.gz
-TSV=/work/FAC/FBM/DBC/amalaspi/popgen/shared_ressources/1000Genomes_umich/1000G_umich_sites/${REF}_chr${CHR}_${VTYPE}.tsv.gz	
-	
+#Position files
+#List of variants in reference panel 
+#(#CHROM\tPOS\tID\tREF\tALT, it can be generated with from genotypes file as bcftools view -G reference.panel.genotypes.bcf)
+VPOS=chr${CHR}.referencePanel.vcf.gz
+
+#List of variants in reference panel 
+#(CHROM\tPOS\tREF,ALT, no header)
+TSV=chr${CHR}.referencePanel.tsv.gz
+
 
 
 #Output VCF and LOG files
