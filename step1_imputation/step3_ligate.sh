@@ -12,19 +12,20 @@
 
 #this script ligates all imputed chunks in one chromosome
 
-#software location of GLIMPSE_ligate
-BIN=/GLIMPSE-v1.1.1/ligate/bin/GLIMPSE_ligate
-
 #chromosome
 CHR=$SLURM_ARRAY_TASK_ID
 
+#software location of GLIMPSE_ligate
+BIN=/GLIMPSE-v1.1.1/ligate/bin/GLIMPSE_ligate
+
+
 LST=/step2_ligate/lists/chr$CHR.list.txt
+ls /step1_impute/output/chr$CHR.reg*.bcf > $LST
 
-ls /step1_impute/output/1000GP_nygc_umich.chr$CHR.reg*.vcf.gz > $LST
+OUT=/step2_ligate/ligated/chr$CHR.ligated.vcf.gz
+OUL=/step2_ligate/ligated/chr$CHR.ligated.log
 
-
-OUT=${PDIR}/step2_ligate/ligated/chr$CHR.ligated.vcf.gz
-OUL=${PDIR}/step2_ligate/ligated/chr$CHR.ligated.log
-
+#Run GLIMPSE_ligate
 $BIN --input $LST --output $OUT --log $OUL
+#index output file
 bcftools index -f $OUT
