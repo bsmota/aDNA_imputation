@@ -39,7 +39,7 @@ GLS=/calls/chr${CHR}/chr${CHR}.merged.bcf
 MAP=/GMAP_shapeit4/chr${CHR}.b37.gmap.gz
 
 #output file
-OUTD=/step1_impute/output/chr$CHR.reg$IDG.bcf
+OUTD=/step1_impute/output/chr$CHR.reg$IDG.vcf.gz
 
 #Run GLIMPSE_phase to impute variants in chunk
 $IMP --input $GLS --reference $REF --input-region $IREG --output-region $OREG --map $MAP --output $OUTD
