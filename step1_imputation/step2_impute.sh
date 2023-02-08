@@ -24,12 +24,13 @@ DATA=$(cat $LST | head -n $SLURM_ARRAY_TASK_ID | tail -n 1)
 IDG=$(echo $DATA | cut -d" " -f1)
 #chromosome
 CHR=$(echo $DATA | cut -d" " -f2)
-
+#chunk with buffer coordinates
 IREG=$(echo $DATA | cut -d" " -f3)
+#chunk without buffer coordinates
 OREG=$(echo $DATA | cut -d" " -f4)
 
 #Reference panel
-REF=/work/FAC/FBM/DBC/amalaspi/popgen/shared_ressources/1000Genomes_umich/1000G_umich_genotypes/1000GP_nygc_umich_chr${CHR}_snps_only_genotypes.vcf.gz
+REF=chr${CHR}.referencePanel_genotypes.bcf
 
 #genotype likelihoods
 GLS=/calls/chr${CHR}/chr${CHR}.merged.bcf
