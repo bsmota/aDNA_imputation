@@ -19,12 +19,10 @@ SPL=$(cat $LST | head -n ${SLURM_ARRAY_TASK_ID} | tail -n 1 | awk '{print $2}')
 #bam filename
 BAM=$(cat $LST | head -n ${SLURM_ARRAY_TASK_ID} | tail -n 1 | awk '{print $3}')
 
-
 #location of bam files
 BAMDIR=/bams
 
 FASTA=reference.genome.fa #reference genome data was aligned to
-
 
 #Position files
 #List of variants in reference panel 
@@ -34,8 +32,6 @@ VPOS=chr${CHR}.referencePanel.vcf.gz
 #List of variants in reference panel 
 #(CHROM\tPOS\tREF,ALT, no header)
 TSV=chr${CHR}.referencePanel.tsv.gz
-
-
 
 #Output VCF and LOG files
 SPL1=/calls/chr${CHR}/${SPL}.raw.calls.spl
