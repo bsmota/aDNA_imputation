@@ -26,6 +26,6 @@ INP=/step2_ligate/ligated/autosomes.ligated.vcf.gz
 OUT=/filtered/${SPL}.${GP}.bcf
 
 
-# split vcf by sample
-bcftools view -s $SID $INP -i'INFO/RAF[0]>0.05 && INFO/RAF[0]<0.95' | bcftools view -i'FORMAT/GP[0:*]>0.99' -O b -o $OUT
+# split bcf by sample, keep sites with MAF>5% and GP>0.80
+bcftools view -s $SID $INP -i'INFO/RAF[0]>0.05 && INFO/RAF[0]<0.95' | bcftools view -i'FORMAT/GP[0:*]>0.80' -O b -o $OUT
 bcftools index -f $OUT
