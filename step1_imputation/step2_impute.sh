@@ -26,7 +26,7 @@ IDG=$(echo $DATA | cut -d" " -f1)
 CHR=$(echo $DATA | cut -d" " -f2)
 #chunk with buffer coordinates
 IREG=$(echo $DATA | cut -d" " -f3)
-#chunk without buffer coordinates
+#chunk without buffer coordinate
 OREG=$(echo $DATA | cut -d" " -f4)
 
 #Reference panel
@@ -43,3 +43,6 @@ OUTD=/step1_impute/output/chr$CHR.reg$IDG.bcf
 
 #Run GLIMPSE_phase to impute variants in chunk
 $IMP --input $GLS --reference $REF --input-region $IREG --output-region $OREG --map $MAP --output $OUTD
+
+bcftools index -f $OUTD
+
