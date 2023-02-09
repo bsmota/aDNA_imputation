@@ -34,21 +34,20 @@ VTYPE=snps_only
 REF=1000GP_nygc_umich
 #Position file	
 
-MSK=/work/FAC/FBM/DBC/amalaspi/popgen/shared_ressources/accessible_genome_masks/diana_masks/chr${CHR}.bed.gz
-HEA=/work/FAC/FBM/DBC/amalaspi/popgen/shared_ressources/accessible_genome_masks/diana_masks/header.txt
+#Accessible genome mask
+MSK=/accessible_genome_masks/chr${CHR}.bed.gz
+#what to add to vcf/bcf file header: 
+#"##INFO=<ID=MASK,Number=1,Type=String,Description="site passing the 1000 Genomes strict mask">"
+HEA=/accessible_genome_masks/header.txt
 
 
-OUT2=${PDIR1}/chr${CHR}/${SPL}.raw.Q20.q30.1000G.mask.calls.vcf.gz
+#Output1 VCF and LOG files
+SPL1=/calls/chr${CHR}/${SPL}.raw.Q20.q30.calls.spl
+OUT=/calls/chr${CHR}/${SPL}.raw.Q20.q30.calls.vcf.gz
+TMP=/calls/chr${CHR}/${SPL}.raw.Q20.q30.calls.tmp.vcf.gz
 
-mkdir -p ${PDIR1}/chr${CHR}/
-
-
-#Output VCF and LOG files
-SPL1=${PDIR1}/chr${CHR}/${SPL}.raw.Q20.q30.calls.spl
-OUT=${PDIR1}/chr${CHR}/${SPL}.raw.Q20.q30.calls.vcf.gz
-TMP=${PDIR1}/chr${CHR}/${SPL}.raw.Q20.q30.calls.tmp.vcf.gz
-LOG=${PDIR1}/chr${CHR}/${SPL}.raw.Q20.q30.calls.log
-
+#output2
+OUT2=/calls/chr${CHR}/${SPL}.raw.Q20.q30.1000G.mask.calls.vcf.gz
 
 #DOC=$(bcftools query -f '%INFO/DP\n' $OUT |  awk 'BEGIN { s = 0; l=0; } { s+=$1; l++; } END { print s/l;}')
 
@@ -61,16 +60,15 @@ echo $LOW $UPP
 
 #Call genotypes using bcftools
 echo ${BAMDIR}/${BAM} $SPL > $SPL1
-#bcftools mpileup -f $FASTA -I -E -a 'FORMAT/DP' --ignore-RG -T $VPOS -Q 20 -q 30 -C 50 -r $CHR ${BAMDIR}/${BAM} | bcftools call -Aim -C alleles -T $TSV -Oz -o $OUT
-#bcftools reheader -s $SPL1 -o $TMP $OUT
+bcftools mpileup -f $FASTA -I -E -a 'FORMAT/DP' --ignore-RG -T $VPOS -Q 20 -q 30 -C 50 -r $CHR ${BAMDIR}/${BAM} | bcftools call -Aim -C alleles -T $TSV -Oz -o $OUT
+bcftools reheader -s $SPL1 -o $TMP $OUT
 mv $TMP $OUT
-#bcftools index -f $OUT
-echo $CHR $BAM $? >> $LOG
+bcftools index -f $OUT
 
 
 #1000G mask
-#bcftools annotate -a $MSK -m MASK=strict -h $HEA -c CHROM,POS,FROM,TO $OUT | bcftools view -i 'INFO/MASK="strict"' -Oz -o $OUT2
-#bcftools index -f $OUT2
+bcftools annotate -a $MSK -m MASK=strict -h $HEA -c CHROM,POS,FROM,TO $OUT | bcftools view -i 'INFO/MASK="strict"' -Oz -o $OUT2
+bcftools index -f $OUT2
 
 #remove repeats, filter for DP and QUAL
 RPT=/work/FAC/FBM/DBC/amalaspi/popgen/shared_ressources/Repeats/by_chr_sorted/chr${CHR}.bed.gz
