@@ -28,18 +28,21 @@ BAM=$(cat $LST | head -n ${SLURM_ARRAY_TASK_ID} | tail -n 1 | awk '{print $2}')
 #Pointer to project
 FASTA=hs.build37.1.fa
 
-
 #Just SNPs for now
-VTYPE=snps_only
-REF=1000GP_nygc_umich
 #Position file	
+
 
 #Accessible genome mask
 MSK=/accessible_genome_masks/chr${CHR}.bed.gz
 #what to add to vcf/bcf file header: 
-#"##INFO=<ID=MASK,Number=1,Type=String,Description="site passing the 1000 Genomes strict mask">"
+#'##INFO=<ID=MASK,Number=1,Type=String,Description="site passing the 1000 Genomes strict mask">'
 HEA=/accessible_genome_masks/header.txt
 
+#USCI repeats regions
+RPT=/Repeats/by_chr_sorted/chr${CHR}.bed.gz
+#what to add to vcf/bcf file header: 
+#'##INFO=<ID=REPEATS,Number=1,Type=String,Description="site found in a UCSC repeat sequence">'
+HEA=/Repeats/by_chr_sorted/header.txt
 
 #Output1 VCF and LOG files
 SPL1=/calls/chr${CHR}/${SPL}.raw.Q20.q30.calls.spl
@@ -47,16 +50,10 @@ OUT=/calls/chr${CHR}/${SPL}.raw.Q20.q30.calls.vcf.gz
 TMP=/calls/chr${CHR}/${SPL}.raw.Q20.q30.calls.tmp.vcf.gz
 
 #output2
-OUT2=/calls/chr${CHR}/${SPL}.raw.Q20.q30.1000G.mask.calls.vcf.gz
+OUT2=/calls/chr${CHR}/${SPL}.raw.Q20.q30.1000G.mask.noRepeats.calls.vcf.gz
 
-#DOC=$(bcftools query -f '%INFO/DP\n' $OUT |  awk 'BEGIN { s = 0; l=0; } { s+=$1; l++; } END { print s/l;}')
-
-echo $DOC; 
-
-#LOW=$(python3 limitsDoC.py $DOC | awk '{print $1}')
-#UPP=$(python3 limitsDoC.py $DOC | awk '{print $2}')
-echo $LOW $UPP
-
+#output3
+OUT3=/calls/chr${CHR}/${SPL}.raw.Q20.q30.1000G.mask.noRepeats.qual.DP.calls.vcf.gz
 
 #Call genotypes using bcftools
 echo ${BAMDIR}/${BAM} $SPL > $SPL1
@@ -65,16 +62,20 @@ bcftools reheader -s $SPL1 -o $TMP $OUT
 mv $TMP $OUT
 bcftools index -f $OUT
 
-
-#1000G mask
-bcftools annotate -a $MSK -m MASK=strict -h $HEA -c CHROM,POS,FROM,TO $OUT | bcftools view -i 'INFO/MASK="strict"' -Oz -o $OUT2
+#1000G mask and remove repeats
+bcftools annotate -a $MSK -m +MASK=strict -h $HEA -c CHROM,POS,FROM,TO $OUT | bcftools view -i 'INFO/MASK="strict"' | bcftools annotate -a $RPT -m REPEATS=repeats -h $HEA2 -c CHROM,POS,FROM,TO | bcftools view --exclude 'REPEATS="repeats"' -Oz -o $OUT
 bcftools index -f $OUT2
 
-#remove repeats, filter for DP and QUAL
-RPT=/work/FAC/FBM/DBC/amalaspi/popgen/shared_ressources/Repeats/by_chr_sorted/chr${CHR}.bed.gz
-HEA=/work/FAC/FBM/DBC/amalaspi/popgen/shared_ressources/Repeats/by_chr_sorted/header.txt
+#depth and QUAL filter
+DOC=$(bcftools query -f '%INFO/DP\n' $OUT |  awk 'BEGIN { s = 0; l=0; } { s+=$1; l++; } END { print s/l;}')
 
-OUT3=${PDIR1}/chr${CHR}/${SPL}.raw.Q20.q30.1000G.mask.noRepeats.qual.calls.vcf.gz
+LOW=$(python3 limitsDoC.py $DOC | awk '{print $1}')
+UPP=$(python3 limitsDoC.py $DOC | awk '{print $2}')
+echo $LOW $UPP
 
-bcftools annotate -a $RPT -m REPEATS=repeats -h $HEA -c CHROM,POS,FROM,TO $OUT2 | bcftools view --exclude 'REPEATS="repeats"' | bcftools filter --exclude "QUAL<30" -Oz -o $OUT3
+bcftools filter --exclude "FORMAT/DP<$LOW |  FMT/DP>${UPP} & QUAL<30" $OUT2 -Oz -o $OUT3
 bcftools index -f $OUT3
+
+rm $OUT
+rm $OUT2
+
