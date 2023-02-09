@@ -28,9 +28,14 @@ BAM=$(cat $LST | head -n ${SLURM_ARRAY_TASK_ID} | tail -n 1 | awk '{print $2}')
 #Pointer to project
 FASTA=hs.build37.1.fa
 
-#Just SNPs for now
 #Position file	
+#List of variants in reference panel 
+#(#CHROM\tPOS\tID\tREF\tALT, it can be generated with from genotypes file as bcftools view -G reference.panel.genotypes.bcf)
+VPOS=chr${CHR}.referencePanel.vcf.gz
 
+#List of variants in reference panel 
+#(CHROM\tPOS\tREF,ALT, no header)
+TSV=chr${CHR}.referencePanel.tsv.gz
 
 #Accessible genome mask
 MSK=/accessible_genome_masks/chr${CHR}.bed.gz
