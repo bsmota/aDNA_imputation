@@ -1,0 +1,44 @@
+#!/bin/bash
+#SBATCH --job-name concordance
+#SBATCH --nodes 1
+#SBATCH --ntasks 1
+#SBATCH --cpus-per-task 1
+#SBATCH --export=NONE
+#SBATCH --mem 2G
+#SBATCH --time=3:00:00
+#SBATCH --output=concordance.out
+#SBATCH --error=concordance.er
+
+#compute concordance between validation and imputed genotypes
+
+#coverage to which data was downsampled before imputing
+COV=$1
+
+#Population allele frequency
+AF=$2
+
+#software location
+BIN=/GLIMPSE-v1.1.1/concordance/bin/GLIMPSE_concordance
+
+#list with info, each row contains information regarding one chromosome, 
+#and it has 4 columns: chromosome referencePanel.alleleFrequencies validation imputed
+LST=/lists/concordance.cov${COV}.lst
+
+#make list for the 22 chromosomes
+for CHR in {1..22}; do 
+
+	REF=referencePanel.sites.vcf.gz
+	VAL=/calls/chr${CHR}/merged.raw.Q20.q30.1000G.mask.noRepeats.DP.qual.calls.vcf.gz
+	IMP=/step1_imputation/step2_ligate/cov${COV}/ligated/chr$CHR.ligated.bcf
+
+	echo "$CHR $REF $VAL $IMP" >> $LST
+done
+
+
+#PATH + FILE PREFIX
+OUT=/output/cov${COV}
+
+mkdir -p $PDIR
+#Run GLIMPSE concordance
+$BIN --input $LST --minDP 8 --output $OUT --minPROB 0.9999 --bins 0.000 0.001 0.010 0.020 0.050 0.100 0.200 0.300 0.400 0.500 --af-tag $AF
+
